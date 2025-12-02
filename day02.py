@@ -1,16 +1,33 @@
-with open("./inputs/day02.txt", "r") as f:
-    line = f.read().strip()
-    pids = line.split(",")
+PATH = "./inputs/day02.txt"
 
-result = 0
 
-for i in pids:
-    pid_range = i.split("-")
-    for n in range(int(pid_range[0]), int(pid_range[1]) + 1):
-        if len(str(n)) % 2 != 0:
-            continue
-        midpoint = int(len(str(n)) / 2)
-        if str(n)[:midpoint] == str(n)[midpoint:]:
-            result += n
+def is_invalid_pid(n: int) -> bool:
+    s = str(n)
+    if len(s) % 2 != 0:
+        return False
+    
+    midpoint = len(s) // 2
+    return s[:midpoint] == s[midpoint:]
 
-print(result)
+
+def sum_invalid_pids(path: str = PATH) -> int:
+    with open(path, "r") as f:
+        line = f.read().strip()
+
+    result = 0
+
+    for pid_range in line.split(","):
+        start_str, end_str = pid_range.split("-")
+        start = int(start_str)
+        end = int(end_str)
+
+        for n in range(start, end + 1):
+            if is_invalid_pid(n):
+                result += n
+
+    return result
+
+
+if __name__ == "__main__":
+    result = sum_invalid_pids(PATH)
+    print(result)
