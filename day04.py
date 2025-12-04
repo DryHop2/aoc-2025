@@ -27,6 +27,8 @@ def count_accessible(path: str) -> int:
                 if 0 <= rr < rows and 0 <= cc < cols:
                     if grid[rr][cc] == "@":
                         neighbors += 1
+                        if neighbors == 4:
+                            break
 
             if neighbors < 4:
                 accessible.append((r, c))
