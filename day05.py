@@ -1,30 +1,31 @@
 PATH = "./inputs/day05.txt"
 
 
-fresh_ranges = []
-available = []
+def parse_database(path: str) -> tuple[list[tuple[int, int]], list[int]]:
+    with open(path) as f:
+        lines = [line.strip() for line in f]
 
-with open(PATH, "r") as f:
-    lines = [line.strip() for line in f]
+    blank_index = lines.index("")
 
-blank = lines.index("")
-range_lines = lines[:blank]
-available_lines = lines[blank + 1:]
+    fresh_ranges: list[tuple[int, int]] = []
+    for line in lines[:blank_index]:
+        start, end = map(int, line.split("-"))
+        fresh_ranges.append((start, end))
 
-for item in range_lines:
-    lo, hi = item.split("-")
-    fresh_ranges.append((int(lo), int(hi)))
+    available_ids = [int(x) for x in lines[blank_index + 1:]]
 
-available = [int(x) for x in available_lines]
-
-
-def is_fresh(id_: int, ranges: list[tuple[int, int]]) -> bool:
-    for lo, hi in ranges:
-        if lo <= id_ <= hi:
-            return True
-    return False
+    return fresh_ranges, available_ids
 
 
-result = sum(1 for ing in available if is_fresh(ing, fresh_ranges))
+def is_fresh(ingredient_id: int, ranges: list[tuple[int, int]]) -> bool:
+    return any(lo <= ingredient_id <= hi for lo, hi in ranges)
 
-print(result)
+
+def count_fresh_ingredients(path: str) -> int:
+    fresh_ranges, available_ids = parse_database(path)
+    return sum(1 for id_ in available_ids if is_fresh(id_, fresh_ranges))
+
+
+if __name__ == "__main__":
+    result = count_fresh_ingredients(PATH)
+    print(result)
