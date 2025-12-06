@@ -2,7 +2,7 @@ PATH = "./inputs/day06.txt"
 
 
 with open(PATH, "r") as f:
-    lines = [list(line.split()) for line in f]
+    lines = [line.split() for line in f]
 
 operands = [list(map(int, line)) for line in lines[:4]]
 ops = lines[4]
