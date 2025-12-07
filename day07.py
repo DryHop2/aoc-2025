@@ -36,39 +36,62 @@ PATH = "./inputs/day07.txt"
 # print(beams_count)
 # print(splits)
 
-with open(PATH) as f:
-    grid = [line.rstrip("\n") for line in f]
+def read_grid(path: str) -> list[str]:
+    with open(path) as f:
+        lines = [line.rstrip("\n") for line in f]
+    
+    width = max(len(line) for line in lines)
+    return [line.ljust(width) for line in lines]
 
-rows = len(grid)
-cols = len(grid[0])
 
-start_row = 0
-start_col = grid[start_row].index("S")
+def find_symbol(grid: list[str], symbol: str = "S") -> tuple[int, int]:
+    for r, row in enumerate(grid):
+        c = row.find(symbol)
+        if c != -1:
+            return r, c
+    raise ValueError(f"Symbol {symbol!r} not found in grid")
 
-timelines = [0] * cols
-timelines[start_col] = 1
 
-for r in range(start_row + 1, rows):
-    new_timelines = [0] * cols
+def step_quantum_row(row: str, timelines: list[int]) -> list[int]:
+    cols = len(row)
+    next_timelines = [0] * cols
 
-    for c in range(cols):
-        count = timelines[c]
+    for c, count in enumerate(timelines):
         if count == 0:
             continue
+        cell = row[c]
 
-        cell = grid[r][c]
-
-        if cell == ".":
-            new_timelines[c] += count
+        if cell == "." or cell == "S":
+            next_timelines[c] += count
         elif cell == "^":
             if c > 0:
-                new_timelines[c - 1] += count
+                next_timelines[c - 1] += count
             if c < cols - 1:
-                new_timelines[c + 1] += count
-        elif cell == "S":
-            new_timelines[c] += count
+                next_timelines[c + 1] += count
+        else:
+            pass
+    
+    return next_timelines
 
-    timelines = new_timelines
 
-total_timelines = sum(timelines)
-print(total_timelines)
+def count_timelines(grid: list[str]) -> int:
+    rows, cols = len(grid), len(grid[0])
+    start_row, start_col = find_symbol(grid, "S")
+
+    timelines = [0] * cols
+    timelines[start_col] = 1
+
+    for r in range(start_row + 1, rows):
+        timelines = step_quantum_row(grid[r], timelines)
+
+    return sum(timelines)
+
+
+def main(path: str = PATH) -> None:
+    grid = read_grid(path)
+    total_timelines = count_timelines(grid)
+    print(total_timelines)
+
+
+if __name__ == "__main__":
+    main()
