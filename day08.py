@@ -30,6 +30,50 @@ def build_edges(points):
     return edges
 
 
+class DSU:
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.size = [1] * n
+        self.components = n
+
+
+    def find(self, x: int) -> int:
+        parent = self.parent
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        
+        return x
+    
+
+    def union(self, a: int, b: int) -> bool:
+        ra = self.find(a)
+        rb = self.find(b)
+        if ra == rb:
+            return False
+        
+        size = self.size
+        parent = self.parent
+
+        if size[ra] < size[rb]:
+            ra, rb = rb, ra
+
+        parent[rb] = ra
+        size[ra] += size[rb]
+        self.components -= 1
+        
+        return True
+    
+
+    def component_sizes(self):
+        comp = {}
+        for i in range(len(self.parent)):
+            root = self.find(i)
+            comp[root] = comp.get(root, 0) + 1
+
+        return list(comp.values())
+
+
 def part1(text: str, num_pairs: int = 1000):
     points = parse(text)
     n = len(points)
@@ -49,38 +93,11 @@ def part1(text: str, num_pairs: int = 1000):
 
     edges = heapq.nsmallest(num_pairs, gen_edges(), key=lambda e: e[0])
 
-    parent = list(range(n))
-    size = [1] * n
-
-
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        
-        return x
-    
-
-    def union(a, b):
-        ra = find(a)
-        rb = find(b)
-        if ra == rb:
-            return
-        if size[ra] < size[rb]:
-            ra, rb = rb, ra
-        parent[rb] = ra
-        size[ra] += size[rb]
-
-
+    dsu = DSU(n)
     for _, i, j in edges:
-        union(i, j)
+        dsu.union(i, j)
 
-    comps = {}
-    for i in range(n):
-        root = find(i)
-        comps[root] = comps.get(root, 0) + 1
-
-    sizes = sorted(comps.values(), reverse=True)
+    sizes = sorted(dsu.component_sizes(), reverse=True)
 
     return prod(sizes[:3])
 
@@ -90,39 +107,14 @@ def part2(text: str):
     n = len(points)
     edges = build_edges(points)
 
-    parent = list(range(n))
-    size = [1] * n
-
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-
-        return x
-    
-
-    def union(a, b):
-        ra = find(a)
-        rb = find(b)
-        if ra == rb:
-            return False
-        if size[ra] < size[rb]:
-            ra, rb = rb, ra
-        parent[rb] = ra
-        size[ra] += size[rb]
-
-        return True
-    
-
-    components = n
+    dsu = DSU(n)
     last_pair = None
     
 
     for _, i, j in edges:
-        if union(i, j):
-            components -= 1
+        if dsu.union(i, j):
             last_pair = (i, j)
-            if components == 1:
+            if dsu.components == 1:
                 break
 
     if last_pair is None:
