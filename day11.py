@@ -1,3 +1,6 @@
+from functools import lru_cache
+
+
 PATH = "./inputs/day11.txt"
 
 
@@ -32,10 +35,33 @@ def count_paths(graph, start, goal):
     return count
 
 
+def count_paths_dp(graph, start, goal):
+    @lru_cache(maxsize=None)
+    def dfs(node):
+        if node == goal:
+            return 1
+        return sum(dfs(nei) for nei in graph.get(node, []))
+    return dfs(start)
+
+
+def count_paths_dac_fft_dp(graph, start, goal):
+    @lru_cache(maxsize=None)
+    def dfs(node, seen_dac, seen_fft):
+        if node == "dac":
+            seen_dac = True
+        if node == "fft":
+            seen_fft = True
+        if node == goal:
+            return 1 if (seen_dac and seen_fft) else 0
+        return sum(dfs(nei, seen_dac, seen_fft) for nei in graph.get(node, []))
+    return dfs(start, False, False)
+
+
 def main(path: str = PATH):
     with open(path, "r") as f:
         graph = parse(f)
     print(count_paths(graph, "you", "out"))
+    print(count_paths_dac_fft_dp(graph, "svr", "out"))
     
 
 if __name__ == "__main__":
