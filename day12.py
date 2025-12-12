@@ -1,6 +1,3 @@
-from math import prod
-
-
 PATH = "./inputs/day12.txt"
 
 
@@ -39,4 +36,3 @@ def part1(path: str) -> int:
 
 if __name__ == "__main__":
     print(part1(PATH))
-    
